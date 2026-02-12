@@ -12,9 +12,12 @@ fileInput.addEventListener("change", () => {
   if (!f) return;
 
   selectedFile = f;
+
+  // قبل
   beforeImg.src = URL.createObjectURL(f);
   beforeImg.classList.add("show");
 
+  // reset بعد
   afterImg.removeAttribute("src");
   afterPlaceholder.style.display = "block";
   statusEl.textContent = "";
@@ -22,38 +25,39 @@ fileInput.addEventListener("change", () => {
 
 goBtn.addEventListener("click", async () => {
   if (!selectedFile) {
-    statusEl.textContent = "ارفع صورة الأول.";
+    statusEl.textContent = "ارفع صورة الأول من مربع (قبل).";
     return;
   }
 
   goBtn.disabled = true;
   statusEl.textContent = "جاري التحويل...";
 
-  const reader = new FileReader();
-  reader.readAsDataURL(selectedFile);
+  try {
+    // نحول الصورة Base64 (DataURL)
+    const base64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(selectedFile);
+    });
 
-  reader.onload = async () => {
-    try {
-      const base64 = reader.result;
+    const resp = await fetch("/api/ramadan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ image: base64 }),
+    });
 
-      const resp = await fetch("/api/ramadan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: base64 })
-      });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(JSON.stringify(data));
 
-      const data = await resp.json();
-      if (!resp.ok) throw new Error(JSON.stringify(data));
-
-      afterImg.src = `data:image/png;base64,${data.imageBase64}`;
-      afterImg.classList.add("show");
-      afterPlaceholder.style.display = "none";
-
-      statusEl.textContent = "تم ✅";
-    } catch (e) {
-      statusEl.textContent = "خطأ: " + e.message;
-    } finally {
-      goBtn.disabled = false;
-    }
-  };
+    // بعد
+    afterImg.src = `data:image/png;base64,${data.imageBase64}`;
+    afterImg.classList.add("show");
+    afterPlaceholder.style.display = "none";
+    statusEl.textContent = "تم ✅";
+  } catch (e) {
+    statusEl.textContent = "خطأ: " + e.message;
+  } finally {
+    goBtn.disabled = false;
+  }
 });

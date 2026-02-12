@@ -1,4 +1,7 @@
 {
   "name": "ramadan-site",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "openai": "^6.0.0"
+  }
 }

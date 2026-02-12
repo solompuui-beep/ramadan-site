@@ -1,9 +1,7 @@
-import FormData from "form-data";
-
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: "10mb", // علشان base64 بتكون كبيرة
+      sizeLimit: "10mb", // خليها 10mb عشان base64
     },
   },
 };
@@ -23,14 +21,16 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "No image provided" });
     }
 
-    // image جاية DataURL: data:image/png;base64,....
+    // DataURL: data:image/png;base64,....
     const match = String(image).match(/^data:(.+);base64,(.+)$/);
     if (!match) {
-      return res.status(400).json({ error: "Invalid image format (expected DataURL base64)" });
+      return res
+        .status(400)
+        .json({ error: "Invalid image format (expected data:*;base64,....)" });
     }
 
-    const mimeType = match[1];         // مثل image/png
-    const base64Data = match[2];       // الـ base64
+    const mimeType = match[1];
+    const base64Data = match[2];
     const buffer = Buffer.from(base64Data, "base64");
 
     const ext =
@@ -41,25 +41,22 @@ export default async function handler(req, res) {
     const prompt =
       "حوّل الصورة لأجواء رمضانية واقعية بدون تغيير ملامح الشخص: إضاءة دافئة ذهبية، فوانيس رمضان مضيئة، زينة رمضان، هلال ونجوم خفيفة، بوكيه إضاءة، جودة عالية، شكل سينمائي.";
 
-    // ✅ لازم multipart/form-data لأن DALL·E 2 edits عايز file
-    const fd = new FormData();
-    fd.append("model", "dall-e-2");
-    fd.append("prompt", prompt);
-    fd.append("size", "1024x1024");
+    // ✅ استخدم FormData الأصلي + Blob (ده اللي بيشتغل صح على Vercel)
+    const form = new FormData();
+    form.append("model", "dall-e-2");
+    form.append("prompt", prompt);
+    form.append("size", "1024x1024");
 
-    // هنا بنضيف الصورة كـ “ملف”
-    fd.append("image", buffer, {
-      filename: `upload.${ext}`,
-      contentType: mimeType,
-    });
+    const blob = new Blob([buffer], { type: mimeType });
+    form.append("image", blob, `upload.${ext}`);
 
     const resp = await fetch("https://api.openai.com/v1/images/edits", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        ...fd.getHeaders(),
+        // ❗ متحطش Content-Type هنا — fetch هيحطه وحده بالـ boundary الصح
       },
-      body: fd,
+      body: form,
     });
 
     const data = await resp.json();

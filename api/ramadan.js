@@ -1,8 +1,9 @@
 import { GoogleGenAI } from "@google/genai";
 
 export const config = {
-  runtime: "nodejs",
-  api: { bodyParser: { sizeLimit: "15mb" } }
+  api: {
+    bodyParser: { sizeLimit: "15mb" }
+  }
 };
 
 export default async function handler(req, res) {
@@ -13,7 +14,7 @@ export default async function handler(req, res) {
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ error: "Missing GEMINI_API_KEY in Vercel Env Vars" });
+      return res.status(500).json({ error: "Missing GEMINI_API_KEY on Vercel" });
     }
 
     const { image } = req.body || {};
@@ -28,7 +29,7 @@ export default async function handler(req, res) {
     const ai = new GoogleGenAI({ apiKey });
 
     const prompt =
-      "حوّل الصورة لأجواء رمضانية واقعية بدون تغيير ملامح الشخص: فوانيس رمضان مضيئة، زينة رمضان معلّقة، إضاءة ذهبية دافئة، هلال ونجوم خفيفة، طابع سينمائي واقعي، جودة عالية. بدون كتابة على الوجه.";
+      "حوّل الصورة لأجواء رمضانية واقعية بدون تغيير ملامح الشخص: فوانيس رمضان مضيئة، زينة رمضانية معلّقة، إضاءة ذهبية دافئة، هلال ونجوم خفيفة، طابع سينمائي واقعي، جودة عالية.";
 
     const response = await ai.models.generateContent({
       model: "gemini-3-pro-image-preview",
@@ -48,7 +49,7 @@ export default async function handler(req, res) {
     const imgPart = parts.find(p => p.inlineData?.data);
 
     if (!imgPart?.inlineData?.data) {
-      return res.status(500).json({ error: "No image returned from Gemini", debug: { partsCount: parts.length } });
+      return res.status(500).json({ error: "No image returned from Gemini" });
     }
 
     return res.status(200).json({ imageBase64: imgPart.inlineData.data });

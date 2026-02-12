@@ -1,8 +1,4 @@
 {
   "name": "ramadan-site",
-  "private": true,
-  "dependencies": {
-    "form-data": "^4.0.0",
-    "formidable": "^3.5.1"
-  }
+  "private": true
 }

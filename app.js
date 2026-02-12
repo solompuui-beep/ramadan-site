@@ -22,33 +22,38 @@ fileInput.addEventListener("change", () => {
 
 goBtn.addEventListener("click", async () => {
   if (!selectedFile) {
-    statusEl.textContent = "ارفع صورة الأول من مربع (قبل).";
+    statusEl.textContent = "ارفع صورة الأول.";
     return;
   }
 
   goBtn.disabled = true;
   statusEl.textContent = "جاري التحويل...";
 
-  try {
-    const fd = new FormData();
-    fd.append("image", selectedFile);
+  const reader = new FileReader();
+  reader.readAsDataURL(selectedFile);
 
-    const resp = await fetch("/api/ramadan", {
-      method: "POST",
-      body: fd
-    });
+  reader.onload = async () => {
+    try {
+      const base64 = reader.result;
 
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(JSON.stringify(data?.error || data));
+      const resp = await fetch("/api/ramadan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: base64 })
+      });
 
-    afterImg.src = `data:image/png;base64,${data.imageBase64}`;
-    afterImg.classList.add("show");
-    afterPlaceholder.style.display = "none";
+      const data = await resp.json();
+      if (!resp.ok) throw new Error(JSON.stringify(data));
 
-    statusEl.textContent = "تم ✅";
-  } catch (e) {
-    statusEl.textContent = "خطأ: " + e.message;
-  } finally {
-    goBtn.disabled = false;
-  }
+      afterImg.src = `data:image/png;base64,${data.imageBase64}`;
+      afterImg.classList.add("show");
+      afterPlaceholder.style.display = "none";
+
+      statusEl.textContent = "تم ✅";
+    } catch (e) {
+      statusEl.textContent = "خطأ: " + e.message;
+    } finally {
+      goBtn.disabled = false;
+    }
+  };
 });

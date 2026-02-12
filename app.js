@@ -44,8 +44,17 @@ goBtn.addEventListener("click", async () => {
       body: JSON.stringify({ image: base64 })
     });
 
-    const data = await resp.json();
-    if (!resp.ok) throw new Error(JSON.stringify(data));
+   const text = await resp.text();
+let data;
+try { data = JSON.parse(text); } catch { data = { raw: text }; }
+
+if (!resp.ok) {
+  throw new Error(data?.error ? JSON.stringify(data.error) : JSON.stringify(data));
+}
+
+// لو تمام
+afterImg.src = `data:image/png;base64,${data.imageBase64}`;
+
 
     afterImg.src = `data:image/png;base64,${data.imageBase64}`;
     afterImg.classList.add("show");
@@ -57,3 +66,4 @@ goBtn.addEventListener("click", async () => {
     goBtn.disabled = false;
   }
 });
+

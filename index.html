@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تحويل صورة رمضان</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="top-banner">
+    <div class="string-lights"></div>
+    <div class="ramadan-text">رمضان كريم</div>
+  </div>
+
+  <main class="card">
+    <header class="hero">
+      <h1>حوّل صورتك لأجواء رمضانية ✨</h1>
+      <p>ارفع صورتك في مربع "قبل" — وبعدها اضغط تحويل.</p>
+    </header>
+
+    <section class="grid">
+      <div class="box big">
+        <h3>قبل</h3>
+
+        <label class="upload-area" for="file">
+          <div class="upload-inner">
+            <div class="upload-icon">📷</div>
+            <div class="upload-title">اضغط هنا لاختيار صورة</div>
+            <div class="upload-sub">JPG / PNG / WEBP</div>
+          </div>
+          <img id="before" class="preview" alt="before preview" />
+        </label>
+
+        <input id="file" class="hidden-input" type="file" accept="image/*" />
+      </div>
+
+      <div class="box big">
+        <h3>بعد</h3>
+        <div class="after-wrap">
+          <img id="after" class="preview show" alt="after preview" />
+          <div id="afterPlaceholder" class="after-placeholder">
+            هتظهر هنا الصورة الرمضانية ✨
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="actions">
+      <button id="go">تحويل لأجواء رمضان</button>
+      <div id="status" class="status"></div>
+    </section>
+
+    <footer class="footer">
+      الموقع من صنع اسلام المصري — مجاني تمامًا
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
